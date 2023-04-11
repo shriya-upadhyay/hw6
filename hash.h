@@ -19,15 +19,74 @@ struct MyStringHash {
     // hash function entry point (i.e. this is h(k))
     HASH_INDEX_T operator()(const std::string& k) const
     {
-        // Add your code here
+
+			unsigned long long w[5];
+			for(int l = 0; l < 5; l++) {
+				w[l] = 0;
+			}
+			
+			int i = 4;
+			int counter = 0;
+
+			std::vector<unsigned long long> powers;
+
+			powers.push_back(1);
+			powers.push_back(36);
+			powers.push_back(1296);
+			powers.push_back(46656);
+			powers.push_back(1679616);
+			powers.push_back(60466176);
 
 
+			unsigned long long val = 0;
+			for(int j = k.length() - 1; j >= 0; j--) {
+				val += powers[counter]* letterDigitToNumber(k[j]);
+				counter++;
+
+				if(counter == 6){
+					w[i] = val;
+					val = 0;
+					counter = 0;
+					i--;
+				}
+
+			}
+
+			if (i >= 0 && counter < 6) {
+				w[i] = val;
+			}
+
+			HASH_INDEX_T hash_val = 0;
+
+			for (int i = 0; i < 5; i++ ) {
+				//std:: cout << "i: " << w[i] << std::endl;
+			}
+			for (int p = 0; p < 5; p++) {
+				hash_val += (rValues[p] * w[p]);
+			}
+        
+        
+		return hash_val;
     }
 
     // A likely helper function is to convert a-z,0-9 to an integral value 0-35
     HASH_INDEX_T letterDigitToNumber(char letter) const
     {
-        // Add code here or delete this helper function if you do not want it
+        size_t val;
+
+				if (letter >= 'A' && letter <= 'Z') {
+        	letter = tolower(letter);
+				}
+
+        if (letter >= 'a' && letter <= 'z') {
+            val = letter - 'a';
+        }
+
+        else if (letter >= '0' && letter <= '9') {
+            val = letter - '0' + 26;
+        }
+
+        return val;
 
     }
 
