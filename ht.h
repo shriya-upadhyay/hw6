@@ -102,10 +102,13 @@ public:
     // To be completed
     HASH_INDEX_T next() 
     {
+
+        //check if the num of probes is >= to total size of hashtable (means we have wrapped around and returned)
         if(this -> numProbes_ >= this -> m_ ) {
             return this->npos; 
         }
 
+        //return location of next item in hash table
         HASH_INDEX_T loc = (this->start_ + (dhstep_* this -> numProbes_)) % this->m_;
         this->numProbes_++;
         return loc;
@@ -275,8 +278,11 @@ private:
     static const HASH_INDEX_T CAPACITIES[];
     HASH_INDEX_T mIndex_;  // index to CAPACITIES
     
+    //keep track of table size (number of items in table) --> different than m_
     size_t table_size;
+    //keep track of alpha num
     double alpha;
+    //keep track of num_delete (set to null)
     int num_deleted;
 
 
@@ -303,11 +309,13 @@ HashTable<K,V,Prober,Hash,KEqual>::HashTable(
     double resizeAlpha, const Prober& prober, const Hasher& hash, const KEqual& kequal)
        :  hash_(hash), kequal_(kequal), prober_(prober), alpha(resizeAlpha)
 {
+    //initialize alpha, mIndex, size of table, and num_delete
     mIndex_ = 0;
     table_size = 0;
     num_deleted = 0;
 
 
+    //set everything in table to  NULL
     for (HASH_INDEX_T i = 0; i < CAPACITIES[mIndex_]; i++) {
         table_.push_back(NULL);
     }
@@ -320,6 +328,7 @@ template<typename K, typename V, typename Prober, typename Hash, typename KEqual
 HashTable<K,V,Prober,Hash,KEqual>::~HashTable()
 {
 
+    //delete everything in table
     for(size_t i = 0; i < table_.size(); i++) {
         if (table_[i] != nullptr) {
             delete table_[i];
@@ -333,6 +342,7 @@ HashTable<K,V,Prober,Hash,KEqual>::~HashTable()
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 bool HashTable<K,V,Prober,Hash,KEqual>::empty() const
 {
+    //use table_size to determine if table is empty
 	if (table_size == 0){
 		return true;
 	}
@@ -353,15 +363,20 @@ size_t HashTable<K,V,Prober,Hash,KEqual>::size() const
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 {
+    //if trying to insert and no space left (depending on alpha value), resize
     if ((double(table_size) + double(num_deleted))/(double(CAPACITIES[mIndex_])) >= alpha) {
         this -> resize();
     }
 
+    //probe to get insertion index
 		HASH_INDEX_T index= probe(p.first);
 
+    //if index is end of table, throw error
 		if (index == npos) {
 			throw std::logic_error("");
 		}
+    //if index is null, instantiate new object and add there
+    //update table size accordingly
 		if (table_[index] == nullptr) {
     	table_size++;
 			table_[index] = new HashItem(p);
@@ -377,15 +392,18 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::remove(const KeyType& key)
 {
+    //find item to be removed depending on key
     HashItem* item = this -> internalFind(key);
-		if (item == nullptr) {
-			return;
-		}
-		else {
-    item -> deleted = true;
-    table_size--;
-		num_deleted++;
-		}
+    if (item == nullptr) {
+        return;
+    }
+    //set item_delete to true
+    //update table size and num deleted
+	else {
+        item -> deleted = true;
+        table_size--;
+        num_deleted++;
+	}
 }
 
 
@@ -459,34 +477,43 @@ typename HashTable<K,V,Prober,Hash,KEqual>::HashItem* HashTable<K,V,Prober,Hash,
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::resize()
 {
+    //increment index for size of vector
     mIndex_++;
 
+
+    //create vector to hold old table
     std::vector<HashItem*> old_table = table_;
 
+    //create vector to hold new table
     std::vector<HashItem*> big_table((CAPACITIES[mIndex_]));
 
+    //set everything in new table to NULL
     for (unsigned int j = 0; j < CAPACITIES[mIndex_]; j++) {
         big_table[j] = nullptr;
     }
 
+    //update data members accordingly
     table_ = big_table;
     size_t new_table_size = 0;
     size_t new_num_deleted = 0;
 
 
+    //copy over items from old table to new table
+    //delete old items, even thos that were previously "deleted"
     for (unsigned int i = 0; i < CAPACITIES[mIndex_ - 1]; i++) {
         if (old_table[i] != nullptr && old_table[i] -> deleted == true) {
             delete old_table[i];
         }
         else if (old_table[i] != nullptr) {
-					ItemType it = old_table[i] -> item;
-					insert(it);
-					delete(old_table[i]);
-					new_table_size++;
+            ItemType it = old_table[i] -> item;
+            insert(it);
+            delete(old_table[i]);
+            new_table_size++;
         }
 
     }
 
+    //update data members accordingly
     table_size = new_table_size;
     num_deleted = new_num_deleted;
 

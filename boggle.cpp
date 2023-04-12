@@ -94,6 +94,9 @@ std::set<std::string> boggle(const std::set<std::string>& dict, const std::set<s
 bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>& prefix, const std::vector<std::vector<char> >& board, 
 								   std::string word, std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
 {
+
+	//base case: checks if we have gone over the edge both in terms of columns and in terms of rows
+	//if we have gone over check if we have a word, otherwise return false
 	if (r == board.size() || c == board.size() ) {
 		if (dict.find(word) != dict.end()) {
 			result.insert(word);
@@ -104,8 +107,13 @@ bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>
 		}
 	}
 
+
+  //add new letter to board
 	word+= board[r][c];
 
+	//check if the current word is a prefix
+
+	//if current word is not prefix, check if it is a word, otherwise return false
 	if(prefix.find(word) == prefix.end()) {
 		if (dict.find(word) != dict.end()) {
 			result.insert(word);
@@ -116,8 +124,11 @@ bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>
 		}
 	}
 
+//if current word is a prefex, break down into three cases
 else if (prefix.find(word) != prefix.end()) {
+	//this is the case where we are checking for words by increasing column (aka moving right)
 	if(dr == 0 && dc == 1) {
+		//if we are at the edge of the board, check if we have a word, otherwise return false
 		if (c + 1 == board.size()) {
 			if (dict.find(word) != dict.end()) {
 				result.insert(word);
@@ -125,10 +136,15 @@ else if (prefix.find(word) != prefix.end()) {
 			}
 			return false;
 		}
+
+		//if we are not at edge of board, recurse to see if the next letter in the pattern returns true,
+		//if so return true for this word as well
 		else {
 			if (boggleHelper(dict, prefix, board, word, result, r, c + 1, 0, 1) == true)  {
 				return true;
 			}
+
+			//if next letter in pattern returns false, only check if current word is valid, if so return true
 			else {
 				if (dict.find(word) != dict.end()) {
 					result.insert(word);
@@ -137,11 +153,12 @@ else if (prefix.find(word) != prefix.end()) {
 				return false;
 			}
 			
-			
 		}
 	}
 
+		//this is the case where we are checking for words by increasing row (aka moving down)
 	else if(dr == 1 && dc == 0) {
+		//if we are at the edge of the board, check if we have a word, otherwise return false
 		if (r + 1 == board.size()) {
 			if (dict.find(word) != dict.end()) {
 				result.insert(word);
@@ -150,11 +167,15 @@ else if (prefix.find(word) != prefix.end()) {
 			return false;
 		}
 
+		//if we are not at edge of board, recurse to see if the next letter in the pattern returns true,
+		//if so return true for this word as well
 		else {
 			if (boggleHelper(dict, prefix, board, word, result, r + 1, c , 1, 0) == true) {
 				return true;
 			}
 
+
+			//if next letter in pattern returns false, only check if current word is valid, if so return true
 			else {
 				if (dict.find(word) != dict.end()) {
 					result.insert(word);
@@ -166,7 +187,9 @@ else if (prefix.find(word) != prefix.end()) {
 	
 	}
 
+	//this is the case where we are checking for words by increasing row and column (aka moving diagonal)
 	else if(dr == 1 && dc == 1) {
+		//if we are at the edge of the board, check if we have a word, otherwise return false
 		if (r + 1 == board.size() || c + 1 == board.size()) {
 			if (dict.find(word) != dict.end()) {
 				result.insert(word);
@@ -174,11 +197,15 @@ else if (prefix.find(word) != prefix.end()) {
 			}
 			return false;
 		}
+
+		//if we are not at edge of board, recurse to see if the next letter in the pattern returns true,
+		//if so return true for this word as well
 		else {
 			if (boggleHelper(dict, prefix, board, word, result, r + 1, c + 1, 1, 1)) {
 				return true;
 			}
 
+			//if next letter in pattern returns false, only check if current word is valid, if so return true
 			else {
 			if (dict.find(word) != dict.end()) {
 				result.insert(word);
@@ -192,6 +219,8 @@ else if (prefix.find(word) != prefix.end()) {
 
 }
 
+
+//return false if we reach end and no solution is found
 word = "";
 return false;
 
