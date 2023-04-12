@@ -94,6 +94,108 @@ std::set<std::string> boggle(const std::set<std::string>& dict, const std::set<s
 bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>& prefix, const std::vector<std::vector<char> >& board, 
 								   std::string word, std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
 {
+	if (r == board.size() || c == board.size() ) {
+		if (dict.find(word) != dict.end()) {
+			result.insert(word);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	word+= board[r][c];
+
+	if(prefix.find(word) == prefix.end()) {
+		if (dict.find(word) != dict.end()) {
+			result.insert(word);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+else if (prefix.find(word) != prefix.end()) {
+	if(dr == 0 && dc == 1) {
+		if (c + 1 == board.size()) {
+			if (dict.find(word) != dict.end()) {
+				result.insert(word);
+				return true;
+			}
+			return false;
+		}
+		else {
+			if (boggleHelper(dict, prefix, board, word, result, r, c + 1, 0, 1) == true)  {
+				return true;
+			}
+			else {
+				if (dict.find(word) != dict.end()) {
+					result.insert(word);
+					return true;
+				}
+				return false;
+			}
+			
+			
+		}
+	}
+
+	else if(dr == 1 && dc == 0) {
+		if (r + 1 == board.size()) {
+			if (dict.find(word) != dict.end()) {
+				result.insert(word);
+				return true;
+			}
+			return false;
+		}
+
+		else {
+			if (boggleHelper(dict, prefix, board, word, result, r + 1, c , 1, 0) == true) {
+				return true;
+			}
+
+			else {
+				if (dict.find(word) != dict.end()) {
+					result.insert(word);
+					return true;
+				}
+				return false;
+			}
+		}
+	
+	}
+
+	else if(dr == 1 && dc == 1) {
+		if (r + 1 == board.size() || c + 1 == board.size()) {
+			if (dict.find(word) != dict.end()) {
+				result.insert(word);
+				return true;
+			}
+			return false;
+		}
+		else {
+			if (boggleHelper(dict, prefix, board, word, result, r + 1, c + 1, 1, 1)) {
+				return true;
+			}
+
+			else {
+			if (dict.find(word) != dict.end()) {
+				result.insert(word);
+				return true;
+			}
+			return false;
+			}
+		}
+		
+	}
+
+}
+
+word = "";
+return false;
+
 //add your solution here!
 
 }
+
