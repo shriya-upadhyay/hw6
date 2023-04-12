@@ -27,24 +27,17 @@ struct MyStringHash {
 			
 			int i = 4;
 			int counter = 0;
-
-			std::vector<unsigned long long> powers;
-
-			powers.push_back(1);
-			powers.push_back(36);
-			powers.push_back(1296);
-			powers.push_back(46656);
-			powers.push_back(1679616);
-			powers.push_back(60466176);
-
-
+		
 			unsigned long long val = 0;
+			unsigned long long power = 1;
 			for(int j = k.length() - 1; j >= 0; j--) {
-				val += powers[counter]* letterDigitToNumber(k[j]);
+				val += power* letterDigitToNumber(k[j]);
 				counter++;
+				power *= 36;
 
 				if(counter == 6){
 					w[i] = val;
+					power = 1;
 					val = 0;
 					counter = 0;
 					i--;
